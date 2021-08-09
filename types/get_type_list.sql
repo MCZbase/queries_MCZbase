@@ -25,3 +25,8 @@ order by taxonomy.family,
 	taxonomy.genus, 
 	decode(taxonomy.subspecies, null, taxonomy.species, taxonomy.subspecies)
 ;
+--  Alternate where clause for spider types: 
+--  where flat.phylorder = 'Araneae' 
+--    and collection_cde = 'IZ'
+--    and toptypestatuskind = 'Primary'
+--    and taxonomy.taxon_name_id = mczbase.GET_TYPESTATUSTAXON(flat.collection_object_id,mczbase.get_top_typestatus(flat.collection_object_id))
