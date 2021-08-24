@@ -7,8 +7,9 @@ declare
   l_count NUMBER;
   
   CURSOR c_accns IS
-  select transaction_id, accn_number
+  select accn.transaction_id, accn_number
   from accn
+  where accn.transaction_id in (select transaction_id from trans where trans_date is not null and transaction_type = 'accn')
   ;
   -- where rownum < 100;
   
