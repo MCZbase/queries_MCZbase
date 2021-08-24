@@ -41,6 +41,8 @@ BEGIN
        WHEN NO_DATA_FOUND THEN
           l_time := null;
           l_sql := null;
+       WHEN OTHERS THEN
+         dbms_output.put_line('exception');
     END;
 
     IF l_time is not null THEN 
