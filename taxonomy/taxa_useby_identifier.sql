@@ -52,3 +52,17 @@ where agent_id in (
 ) and
 taxonomy.species is not null
 group by family, taxonomy.genus, taxonomy.species;
+
+-- Somewhat different question a count of the cataloged items identified by an agent (current id or not) 
+-- by family and taxon used in the identification. 
+select count(distinct flat.guid), flat.family, flat.scientific_name 
+from identification_agent
+join identification on identification_agent.identification_id = identification.identification_id
+join coll_object on identification.collection_object_id = coll_object.collection_object_id
+join flat on coll_object.collection_object_id = flat.collection_object_id
+left join identification_taxonomy on identification.identification_id = identification_taxonomy.identification_id
+left join taxonomy on identification_taxonomy.taxon_name_id = taxonomy.taxon_name_id
+where agent_id in (
+   select agent_id from agent_name where agent_name = 'David G. Smith'
+) 
+group by flat.family, flat.scientific_name;
