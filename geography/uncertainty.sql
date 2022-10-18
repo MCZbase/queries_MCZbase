@@ -31,6 +31,10 @@ and max_error_distance > 0
 and max_error_units is not null
 and dec_long is not null and dec_lat is not null;
 
+-- Note, can't do a union between query above and below, as 
+-- SDO_UTIL.TO_WKTGEOMETRY returns a clob, and union does not
+-- operate on clobs.
+
 -- coordinates with uncertainty polygon for all localities with unknown soverign nation, a coordinate, but no uncertainty.
 select locality.locality_id, higher_geog, spec_locality, dec_lat, dec_long,
 to_clob('') as error_polygon
