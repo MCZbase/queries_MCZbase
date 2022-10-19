@@ -57,3 +57,36 @@ from lat_long where dec_lat is not null
 and dec_lat > 0 and dec_long < -72 and dec_long > -78;
 
 
+-- coordinates with uncertainty polygon for all localities with unknown soverign nation, a coordinate, and an uncertainty.
+-- excluding unverified geolocate coordinates.
+select locality.locality_id, higher_geog, spec_locality, dec_lat, dec_long,
+SDO_UTIL.TO_WKTGEOMETRY(sdo_util.circle_polygon(dec_long, dec_lat, to_meters(max_error_distance, max_error_units), to_meters(max_error_distance, max_error_units)/50)) error_polygon,
+georefmethod, verificationstatus
+from lat_long 
+left join locality on lat_long.locality_id = locality.locality_id
+left join geog_auth_rec on locality.geog_auth_rec_id = geog_auth_rec.geog_auth_rec_id
+where accepted_lat_long_fg = 1 
+and locality.locality_id in (
+  select locality_id from flat where sovereign_nation = '[unknown]'
+)
+and max_error_distance is not null
+and max_error_distance > 0
+and max_error_units is not null
+and dec_long is not null and dec_lat is not null
+and not (georefmethod ='GEOLocate' and verificationstatus='unverified');
+
+-- coordinates with uncertainty polygon for all localities with unknown soverign nation, a coordinate, but no uncertainty.
+-- excluding unverified geolocate coordinates.
+select locality.locality_id, higher_geog, spec_locality, dec_lat, dec_long,
+to_clob('') as error_polygon,
+georefmethod, verificationstatus
+from lat_long 
+left join locality on lat_long.locality_id = locality.locality_id
+left join geog_auth_rec on locality.geog_auth_rec_id = geog_auth_rec.geog_auth_rec_id
+where accepted_lat_long_fg = 1 
+and locality.locality_id in (
+  select locality_id from flat where sovereign_nation = '[unknown]'
+)
+and (max_error_distance is null or max_error_distance = 0 or max_error_units is null)
+and dec_long is not null and dec_lat is not null
+and NOT (georefmethod ='GEOLocate' and verificationstatus='unverified');
