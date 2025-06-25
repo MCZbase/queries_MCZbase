@@ -11,7 +11,7 @@ start with label in ('VP_cabinet-1','VP_cabinet-2');
 
 -- Malacology collection objects in freezers
 select sys_connect_by_path( label || ' (' || container_type ||')' ,' | ') parentage,
-guid, flat.scientific_name, flat.author_text, part_name
+guid, flat.scientific_name, flat.author_text, part_name, preserve_method
 from container
 left join coll_obj_cont_hist on container.container_id = coll_obj_cont_hist.container_id
 left join specimen_part on coll_obj_cont_hist.collection_object_id = specimen_part.collection_object_id
