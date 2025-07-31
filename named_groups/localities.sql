@@ -57,4 +57,21 @@ group by locality.locality_id, higher_geog, spec_locality, sovereign_nation, loc
 order by higher_geog
 ;
 
+-- and adding in georeference verification with a join to the lat_long table limited to only currently accepted georeferences, 
+-- which could also be accomplished using the accepted_lat_long view.
 
+select count(cataloged_item.collection_object_id) ct,
+locality.locality_id, higher_geog, spec_locality, sovereign_nation, locality.curated_fg,
+lat_long.verificationstatus, mczbase.get_agentnameoftype(lat_long.verified_by_agent_id) georeferenceverifier
+from 
+cataloged_item
+join collecting_event on cataloged_item.collecting_event_id = collecting_event.collecting_event_id
+join locality on collecting_event.locality_id = locality.locality_id
+join geog_auth_rec on locality.geog_auth_rec_id = geog_auth_rec.geog_auth_rec_id
+join underscore_relation on cataloged_item.collection_object_id = underscore_relation.collection_object_id 
+left join lat_long on locality.locality_id = lat_long.locality_id and lat_long.accepted_lat_long_fg = 1
+where underscore_relation.underscore_collection_id = 701
+group by locality.locality_id, higher_geog, spec_locality, sovereign_nation, locality.curated_fg, lat_long.verificationstatus,
+lat_long.verified_by_agent_id
+order by count(*) desc
+;
