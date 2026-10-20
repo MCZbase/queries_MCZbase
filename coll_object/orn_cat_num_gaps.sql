@@ -27,3 +27,24 @@ select count(*), nvl2(cat_num_integer,0,1)  from cataloged_item where collection
 select count(*) from cataloged_item where collection_cde = 'Orn' and (cat_num_prefix is not null or cat_num_suffix is not null);
 -- returns 0, indicating that cat_num_prefix and cat_num_suffix are null for all records in the Ornithology collection.
 
+-- To obtain the list of missing numbers (62,483): 
+
+WITH bounds AS (
+        SELECT
+                MIN(cat_num_integer) AS low,
+                MAX(cat_num_integer) AS high
+        FROM cataloged_item
+        WHERE collection_cde = 'Orn'
+),
+all_numbers AS (
+        SELECT low + LEVEL - 1 AS cat_num_integer
+        FROM bounds
+        CONNECT BY LEVEL <= high - low + 1
+)
+SELECT cat_num_integer AS missing_cat_num
+FROM all_numbers
+MINUS
+SELECT cat_num_integer
+FROM cataloged_item
+WHERE collection_cde = 'Orn'
+ORDER BY missing_cat_num;
