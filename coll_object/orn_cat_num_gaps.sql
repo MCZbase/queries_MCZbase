@@ -21,6 +21,45 @@ FROM (
 WHERE gap_end >= gap_start
 ORDER BY gap_start;
 
+-- and to go and look up the ledger scans for each gap: 
+
+WITH gaps AS (
+        SELECT
+                gap_start,
+                gap_end,
+                gap_end - gap_start + 1 AS missing_count
+        FROM (
+                SELECT
+                        cat_num_integer + 1 AS gap_start,
+                        LEAD(cat_num_integer) OVER (ORDER BY cat_num_integer) - 1 AS gap_end
+                FROM (
+                        SELECT DISTINCT cat_num_integer
+                        FROM cataloged_item
+                        WHERE collection_cde = 'Orn'
+                )
+        )
+        WHERE gap_end >= gap_start
+)
+SELECT
+        gaps.gap_start,
+        gaps.gap_end,
+        'MCZ:Orn:' || gaps.gap_start AS gapstartguid,
+        'MCZ:Orn:' || gaps.gap_end AS gapendguid,
+        gaps.missing_count,
+        ledger.volumename,
+        ledger.volumepage,
+        ledger.startnum,
+        ledger.endnum,
+        ledger.idsurn,
+        ledger.filename
+FROM gaps
+        LEFT JOIN mczbase.ledgerscans_master ledger
+                ON ledger.department = 'Ornithology'
+                AND ledger.collection = 'Birds'
+                AND ledger.startnum <= gaps.gap_end
+                AND ledger.endnum >= gaps.gap_start
+ORDER BY gaps.gap_start, ledger.volumename, ledger.volumepage;
+
 -- sanity checks for the above:
 select count(*), nvl2(cat_num_integer,0,1)  from cataloged_item where collection_cde = 'Orn' group by nvl2(cat_num_integer,0,1);
 -- returns 325716 | 0, indicating that cat_num_integer is not null for all records in the Ornithology collection.
