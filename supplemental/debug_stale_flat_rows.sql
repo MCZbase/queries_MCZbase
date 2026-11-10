@@ -7,18 +7,18 @@
 --   UPDATE MCZBASE.flat SET stale_flag = 2 WHERE stale_flag = 1;
 --
 -- You can systematically split the stale rows, e.g. by collection, to isolate the problem and
--- quickly move unnafected rows through, e.g.
+-- quickly move unaffected rows through, e.g.
 --
 --   UPDATE MCZBASE.flat SET stale_flag = 1 WHERE stale_flag = 2 AND collection_cde = 'Mala';
 --
--- Then run IS_FLAT_STALE, check if the records for that department went through, if so carry 
--- out the steps below on the remaining stale_flag = 2 rows, if not, flip the targeted collection 
--- back to stale_flag = 2 and move all others from 2 to 1, run IS_FLAT_STALE again, and 
--- then carry out the steps below.  Usuall, only a single record will be blocking.  
--- 
--- The error message may be diagnostic - a particular field in FLAT may be to small for the 
--- assembled data, or the problem may be less obvious, e.g. a join in UPDATE_FLAT's subquery 
--- returns more than one row for a record.  The steps below will find the record and the join 
+-- Then run IS_FLAT_STALE, check if the records for that department went through, if so carry
+-- out the steps below on the remaining stale_flag = 2 rows, if not, flip the targeted collection
+-- back to stale_flag = 2 and move all others from 2 to 1, run IS_FLAT_STALE again, and
+-- then carry out the steps below.  Usually, only a single record will be blocking.
+--
+-- The error message may be diagnostic - a particular field in FLAT may be too small for the
+-- assembled data, or the problem may be less obvious, e.g. a join in UPDATE_FLAT's subquery
+-- returns more than one row for a record.  The steps below will find the record and the join
 -- that is the problem.
 --
 -- ORA-01427 with no function in the error stack below UPDATE_FLAT means one of the joins in
@@ -44,7 +44,7 @@ BEGIN
 	ROLLBACK;
 END;
 /
--- The output of step 1 shows the records that fail, and the error message may be diagnositic.
+-- The output of step 1 shows the records that fail, and the error message may be diagnostic.
 -- If not, continue with step 2 to find if a join is the problem.
 
 
